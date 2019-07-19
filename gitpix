@@ -1,9 +1,15 @@
 #!/usr/bin/perl -w
 
-# ./gen.pl < knilch.in
+# ./gen.pl startdate enddate name email < infile
 
+use strict;
 use Time::Piece;
 use Time::Seconds;
+
+my ($sda, $eda, $na, $ea) = @ARGV;
+
+$sda //= '2018-07-15';
+$eda //= '2020-01-05';
 
 my @pixels;
 
@@ -21,13 +27,16 @@ my $enddate = Time::Piece->strptime('2020-01-05', "%Y-%m-%d"); # sunday as well
 
 die "begin: expected Sunday, got ".$date->fullday."\n" unless ($date->_wday == 0);
 die "end: expected Sunday, got ".$enddate->fullday."\n" unless ($enddate->_wday == 0);
+print STDERR "start $sda, end $eda\n";
 
 my ($i, $k) = (0, 0);
 
 print "git config gc.auto 0\n";
+print "git config user.name \"$na\"\n" if ($na);
+print "git config user.email \"$ea\"\n" if ($ea);
+
 while ($date < $enddate) {
-	$week = int($i/7);
-	$week = $week % $len;
+	my $week = int($i/7) % $len;
 	my $pixel = ${$pixels[$date->_wday]}[$week];
 	my $its = 0;
 	$its = 50 if ($pixel eq '@');
@@ -46,7 +55,7 @@ while ($date < $enddate) {
 	print "echo >\&2\n" if ($its > 0);
 	$date += ONE_DAY;
 	$i++;
-	#print "git gc\n" if (($i % 200) == 199);
 }
 
 print STDERR "$i days, ".int($i/7)." weeks, $k commits.\n"
+
