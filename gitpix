@@ -35,6 +35,8 @@ print "git config gc.auto 0\n";
 print "git config user.name \"$na\"\n" if ($na);
 print "git config user.email \"$ea\"\n" if ($ea);
 
+my $w = 1;
+
 while ($date < $enddate) {
 	my $week = int($i/7) % $len;
 	my $pixel = ${$pixels[$date->_wday]}[$week];
@@ -44,7 +46,8 @@ while ($date < $enddate) {
 	for ( my $c = 0; $c < $its; $c++ ){
 		my $cdate = $date + $c;
 		my $s = '"'.$cdate->strftime("%Y-%m-%d %H:%M:%S").'"';
-		print "echo $s > x\n";
+		$w = 1 - $w;
+		print "echo $w > x\n";
 		print "export GIT_COMMITTER_DATE=$s\n";
 		print "export GIT_AUTHOR_DATE=$s\n";
 		print "git add x\n";
