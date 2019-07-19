@@ -1,0 +1,52 @@
+#!/usr/bin/perl -w
+
+# ./gen.pl < knilch.in
+
+use Time::Piece;
+use Time::Seconds;
+
+my @pixels;
+
+for ( my $i = 0; $i < 7; $i++ ) {
+	chomp(my $line = <>);
+	my @a = split //, $line;
+	push @pixels, \@a;
+}
+
+my $len = scalar @{$pixels[0]};
+
+# start date: 2018-07-15 -> sunday
+my $date = Time::Piece->strptime('2018-07-15', "%Y-%m-%d");
+my $enddate = Time::Piece->strptime('2020-01-05', "%Y-%m-%d"); # sunday as well
+
+die "begin: expected Sunday, got ".$date->fullday."\n" unless ($date->_wday == 0);
+die "end: expected Sunday, got ".$enddate->fullday."\n" unless ($enddate->_wday == 0);
+
+my ($i, $k) = (0, 0);
+
+print "git config gc.auto 0\n";
+while ($date < $enddate) {
+	$week = int($i/7);
+	$week = $week % $len;
+	my $pixel = ${$pixels[$date->_wday]}[$week];
+	my $its = 0;
+	$its = 50 if ($pixel eq '@');
+	$its = 5 if ($pixel eq 'x');
+	for ( my $c = 0; $c < $its; $c++ ){
+		my $cdate = $date + $c;
+		my $s = '"'.$cdate->strftime("%Y-%m-%d %H:%M:%S").'"';
+		print "echo $s > x\n";
+		print "export GIT_COMMITTER_DATE=$s\n";
+		print "export GIT_AUTHOR_DATE=$s\n";
+		print "git add x\n";
+		print "git commit --date=$s -m $s\n";
+		print "echo -n . >\&2\n";
+		$k++;
+	}
+	print "echo >\&2\n" if ($its > 0);
+	$date += ONE_DAY;
+	$i++;
+	#print "git gc\n" if (($i % 200) == 199);
+}
+
+print STDERR "$i days, ".int($i/7)." weeks, $k commits.\n"
