@@ -11,23 +11,23 @@ my ($sda, $eda, $na, $ea) = @ARGV;
 $sda //= '2018-07-15';
 $eda //= '2020-01-05';
 
+my $date = Time::Piece->strptime($sda, "%Y-%m-%d");
+my $enddate = Time::Piece->strptime($eda, "%Y-%m-%d"); # sunday as well
+
+die "begin: expected Sunday, got ".$date->fullday."\n" unless ($date->_wday == 0);
+die "end: expected Sunday, got ".$enddate->fullday."\n" unless ($enddate->_wday == 0);
+print STDERR "start $sda, end $eda\n";
+
 my @pixels;
 
 for ( my $i = 0; $i < 7; $i++ ) {
-	chomp(my $line = <>);
+	chomp(my $line = <STDIN>);
 	my @a = split //, $line;
 	push @pixels, \@a;
 }
 
 my $len = scalar @{$pixels[0]};
-
-# start date: 2018-07-15 -> sunday
-my $date = Time::Piece->strptime('2018-07-15', "%Y-%m-%d");
-my $enddate = Time::Piece->strptime('2020-01-05', "%Y-%m-%d"); # sunday as well
-
-die "begin: expected Sunday, got ".$date->fullday."\n" unless ($date->_wday == 0);
-die "end: expected Sunday, got ".$enddate->fullday."\n" unless ($enddate->_wday == 0);
-print STDERR "start $sda, end $eda\n";
+print STDERR "got $len pixels\n";
 
 my ($i, $k) = (0, 0);
 
