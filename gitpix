@@ -12,7 +12,13 @@ $sda //= '2018-07-15';
 $eda //= '2020-01-05';
 
 my $date = Time::Piece->strptime($sda, "%Y-%m-%d");
-my $enddate = Time::Piece->strptime($eda, "%Y-%m-%d"); # sunday as well
+my $enddate;
+if ($eda =~ /^\+(\d+)$/) {
+	$enddate = $date + ($1 * ONE_WEEK);
+	$eda = $enddate->strftime("%Y-%m-%d");
+} else {
+	$enddate = Time::Piece->strptime($eda, "%Y-%m-%d");
+}
 
 die "begin: expected Sunday, got ".$date->fullday."\n" unless ($date->_wday == 0);
 die "end: expected Sunday, got ".$enddate->fullday."\n" unless ($enddate->_wday == 0);
@@ -50,8 +56,8 @@ while ($date < $enddate) {
 		print "echo $w > x\n";
 		print "export GIT_COMMITTER_DATE=$s\n";
 		print "export GIT_AUTHOR_DATE=$s\n";
-		print "git add x\n";
-		print "git commit --date=$s -m $s\n";
+		print "git add x\n" if ($k == 0);
+		print "git commit --date=$s -m x\n";
 		print "echo -n . >\&2\n";
 		$k++;
 	}
