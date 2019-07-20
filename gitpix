@@ -57,7 +57,7 @@ while ($date < $enddate) {
 		print "export GIT_COMMITTER_DATE=$s\n";
 		print "export GIT_AUTHOR_DATE=$s\n";
 		print "git add x\n" if ($k == 0);
-		print "git commit --date=$s -m x\n";
+		print "git commit x --date=$s -m x\n";
 		print "echo -n . >\&2\n";
 		$k++;
 	}
