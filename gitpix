@@ -10,6 +10,8 @@ my ($sda, $eda, $na, $ea) = @ARGV;
 
 $sda //= '2018-07-15';
 $eda //= '2020-01-05';
+$na //= 'knilch0r';
+$ea //= '<knilch0r@users.noreply.github.com>';
 
 my $date = Time::Piece->strptime($sda, "%Y-%m-%d");
 my $enddate;
@@ -37,10 +39,6 @@ print STDERR "got $len pixels\n";
 
 my ($i, $k) = (0, 0);
 
-print "git config gc.auto 0\n";
-print "git config user.name \"$na\"\n" if ($na);
-print "git config user.email \"$ea\"\n" if ($ea);
-
 my $w = 1;
 
 while ($date < $enddate) {
@@ -51,17 +49,16 @@ while ($date < $enddate) {
 	$its = 5 if ($pixel eq 'x');
 	for ( my $c = 0; $c < $its; $c++ ){
 		my $cdate = $date + $c;
-		my $s = '"'.$cdate->strftime("%Y-%m-%d %H:%M:%S").'"';
+		my $s = $cdate->epoch . ' +0000';
 		$w = 1 - $w;
-		print "echo $w > x\n";
-		print "export GIT_COMMITTER_DATE=$s\n";
-		print "export GIT_AUTHOR_DATE=$s\n";
-		print "git add x\n" if ($k == 0);
-		print "git commit x --date=$s -m x\n";
-		print "echo -n . >\&2\n";
+		print "commit refs/heads/main\n";
+		print "committer $na $ea $s\n";
+		print "data 1\nx\n";
+		print "M 100644 inline x\n";
+		print "data 1\n$w\n";
 		$k++;
 	}
-	print "echo >\&2\n" if ($its > 0);
+	print "progress $pixel\n" if ($its > 0);
 	$date += ONE_DAY;
 	$i++;
 }
